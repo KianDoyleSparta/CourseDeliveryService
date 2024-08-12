@@ -4,6 +4,8 @@ import com.sparta.kd.coursedelivery.entities.*;
 import com.sparta.kd.coursedelivery.repositories.*;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class CourseDeliveryService {
 
@@ -48,30 +50,50 @@ public class CourseDeliveryService {
     }
 
     // Read
-    public void getUser(Integer id) {
-        userRepository.findById(id);
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
     }
 
-    public void getTrainer(Integer id) {
-        trainerRepository.findById(id);
+    public User getUser(Integer id) {
+        return userRepository.findById(id).orElse(null);
     }
 
-    public void getCourse(Integer id) {
-        courseRepository.findById(id);
+    public List<Trainer> getAllTrainers() {
+        return trainerRepository.findAll();
     }
 
-    public void getUserCourse(Integer userId, Integer courseId) {
+    public Trainer getTrainer(Integer id) {
+        return trainerRepository.findById(id).orElse(null);
+    }
+
+    public List<Course> getAllCourses() {
+        return courseRepository.findAll();
+    }
+
+    public Course getCourse(Integer id) {
+        return courseRepository.findById(id).orElse(null);
+    }
+
+    public List<UserCourse> getAllUserCourses() {
+        return userCourseRepository.findAll();
+    }
+
+    public UserCourse getUserCourse(Integer userId, Integer courseId) {
         UserCourseId userCourseID = new UserCourseId();
         userCourseID.setUserId(userId);
         userCourseID.setCourseId(courseId);
-        userCourseRepository.findById(userCourseID);
+        return userCourseRepository.findById(userCourseID).orElse(null);
     }
 
-    public void getTrainerCourse(Integer id) {
+    public List<TrainerCourse> getAllTrainerCourses() {
+        return trainerCourseRepository.findAll();
+    }
+
+    public TrainerCourse getTrainerCourse(Integer id) {
         TrainerCourseId trainerCourseId = new TrainerCourseId();
         trainerCourseId.setTrainerId(id);
         trainerCourseId.setCourseId(id);
-        trainerCourseRepository.findById(trainerCourseId);
+        return trainerCourseRepository.findById(trainerCourseId).orElse(null);
     }
 
     // Update
