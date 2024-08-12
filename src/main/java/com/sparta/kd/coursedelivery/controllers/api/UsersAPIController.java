@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
 
@@ -28,70 +27,62 @@ public class UsersAPIController {
 
     @GetMapping
     public CollectionModel<EntityModel<User>> getAllUsers() {
-
         List<EntityModel<User>> users = courseDeliveryService.getAllUsers()
                 .stream()
-                .map(
-                        user ->
-                        {
-                            List<Link> courseLinks =
-                                    user.getUserCourses()
-                                            .stream()
-                                            .map(
-                                                    course -> WebMvcLinkBuilder.linkTo(
-                                                            methodOn(CourseDeliveryService.class).getCourse(course.getId().getCourseId())).withRel(course.getCourse().getTitle()))
-                                            .toList();
-                            Link selfLink = WebMvcLinkBuilder.linkTo(
-                                    methodOn(UsersAPIController.class).getAllUsers()).withSelfRel();
-                            Link relLink = WebMvcLinkBuilder.linkTo(
-                                    methodOn(UsersAPIController.class).getAllUsers()).withRel("user");
-                            return EntityModel.of(user, selfLink, relLink).add(courseLinks);
-                        })
-                .toList();
+                .map(user -> {
+                    List<Link> courseLinks = user.getUserCourses()
+                            .stream()
+                            .map(course -> WebMvcLinkBuilder.linkTo(
+                                            methodOn(CoursesAPIController.class).getCourse(course.getId().getCourseId())) // Changed to CoursesAPIController
+                                    .withRel(course.getCourse().getTitle()))
+                            .collect(Collectors.toList());
+                    Link selfLink = WebMvcLinkBuilder.linkTo(
+                            methodOn(UsersAPIController.class).getAllUsers()).withSelfRel();
+                    Link relLink = WebMvcLinkBuilder.linkTo(
+                            methodOn(UsersAPIController.class).getAllUsers()).withRel("users"); // Changed "user" to "users"
+                    return EntityModel.of(user, selfLink, relLink).add(courseLinks);
+                })
+                .collect(Collectors.toList());
         return CollectionModel.of(users, WebMvcLinkBuilder.linkTo(methodOn(UsersAPIController.class).getAllUsers()).withSelfRel());
     }
 
     @GetMapping("{id}")
     public ResponseEntity<EntityModel<User>> getUser(@PathVariable Integer id) {
-
-        EntityModel<User> userEntityModel = Stream.of(courseDeliveryService.getUser(id))
-                .map(
-                        user ->
-                        {
-                            List<Link> courseLinks =
-                                    user.getUserCourses()
-                                            .stream()
-                                            .map(
-                                                    course -> WebMvcLinkBuilder.linkTo(
-                                                            methodOn(CourseDeliveryService.class).getCourse(course.getId().getCourseId())).withRel(course.getCourse().getTitle()))
-                                            .toList();
-                            Link selfLink = WebMvcLinkBuilder.linkTo(
-                                    methodOn(UsersAPIController.class).getUser(id)).withSelfRel();
-                            Link relLink = WebMvcLinkBuilder.linkTo(
-                                    methodOn(UsersAPIController.class).getAllUsers()).withRel("user");
-                            return EntityModel.of(user, selfLink, relLink).add(courseLinks);
-                        })
-                .toList().getFirst();
-        return ResponseEntity.ok(userEntityModel);
+        User user = courseDeliveryService.getUser(id);
+        if (user == null) {
+            return ResponseEntity.notFound().build();
+        }
+        EntityModel<User> userEntityModel = EntityModel.of(user);
+        List<Link> courseLinks = user.getUserCourses()
+                .stream()
+                .map(course -> WebMvcLinkBuilder.linkTo(
+                                methodOn(CoursesAPIController.class).getCourse(course.getId().getCourseId())) // Changed to CoursesAPIController
+                        .withRel(course.getCourse().getTitle()))
+                .collect(Collectors.toList());
+        Link selfLink = WebMvcLinkBuilder.linkTo(
+                methodOn(UsersAPIController.class).getUser(id)).withSelfRel();
+        Link relLink = WebMvcLinkBuilder.linkTo(
+                methodOn(UsersAPIController.class).getAllUsers()).withRel("users"); // Changed "user" to "users"
+        return ResponseEntity.ok(userEntityModel.add(selfLink, relLink).add(courseLinks));
     }
 
     @PostMapping
     public ResponseEntity<EntityModel<User>> createUser(@RequestBody User user) {
         courseDeliveryService.createUser(user);
+        Link selfLink = WebMvcLinkBuilder.linkTo(methodOn(UsersAPIController.class).getUser(user.getId())).withSelfRel();
         return ResponseEntity
                 .created(WebMvcLinkBuilder.linkTo(methodOn(UsersAPIController.class).getUser(user.getId())).toUri())
-                .body(EntityModel.of(user, WebMvcLinkBuilder.linkTo(methodOn(UsersAPIController.class).getUser(user.getId())).withSelfRel()));
+                .body(EntityModel.of(user, selfLink));
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("{id}")
     public ResponseEntity<EntityModel<User>> updateUser(@PathVariable Integer id, @RequestBody User user) {
         User userEntity = courseDeliveryService.getUser(id);
         if (userEntity == null) {
             return ResponseEntity.notFound().build();
         }
         courseDeliveryService.createUser(user);
-        return ResponseEntity.ok(
-                EntityModel.of(courseDeliveryService.getUser(id), WebMvcLinkBuilder.linkTo(methodOn(UsersAPIController.class).getUser(id)).withSelfRel()));
+        Link selfLink = WebMvcLinkBuilder.linkTo(methodOn(UsersAPIController.class).getUser(id)).withSelfRel();
+        return ResponseEntity.ok(EntityModel.of(courseDeliveryService.getUser(id), selfLink));
     }
-
 }

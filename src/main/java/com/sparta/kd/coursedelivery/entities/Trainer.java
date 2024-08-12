@@ -1,6 +1,10 @@
 package com.sparta.kd.coursedelivery.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
+
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 @Entity
 @Table(name = "trainers", schema = "coursedelivery")
@@ -18,6 +22,13 @@ public class Trainer {
 
     @Column(name = "expertise", nullable = false)
     private String expertise;
+
+    // New relationship with TrainerCourse
+    @OneToMany(mappedBy = "trainer", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonBackReference
+    private Set<TrainerCourse> trainerCourses = new LinkedHashSet<>();
+
+    // Getters and Setters
 
     public Integer getId() {
         return id;
@@ -51,4 +62,11 @@ public class Trainer {
         this.expertise = expertise;
     }
 
+    public Set<TrainerCourse> getTrainerCourses() {
+        return trainerCourses;
+    }
+
+    public void setTrainerCourses(Set<TrainerCourse> trainerCourses) {
+        this.trainerCourses = trainerCourses;
+    }
 }

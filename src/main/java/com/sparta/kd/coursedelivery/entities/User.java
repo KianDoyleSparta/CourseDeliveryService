@@ -1,5 +1,6 @@
 package com.sparta.kd.coursedelivery.entities;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 
 import java.time.LocalDate;
@@ -27,6 +28,7 @@ public class User {
     private LocalDate dateOfBirth;
 
     @OneToMany(mappedBy = "user")
+    @JsonBackReference
     private Set<UserCourse> userCourses = new LinkedHashSet<>();
 
     public Integer getId() {
