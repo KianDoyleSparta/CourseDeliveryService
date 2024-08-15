@@ -33,7 +33,7 @@ public class TrainersAPIController {
                     List<Link> courseLinks = trainer.getTrainerCourses()
                             .stream()
                             .map(trainerCourse -> WebMvcLinkBuilder.linkTo(
-                                            methodOn(CourseDeliveryService.class).getCourse(trainerCourse.getId().getCourseId()))
+                                            methodOn(CoursesAPIController.class).getCourse(trainerCourse.getId().getCourseId()))
                                     .withRel(trainerCourse.getCourse().getTitle()))
                             .toList();
                     Link selfLink = WebMvcLinkBuilder.linkTo(
@@ -55,7 +55,7 @@ public class TrainersAPIController {
                     List<Link> courseLinks = trainer.getTrainerCourses()
                             .stream()
                             .map(trainerCourse -> WebMvcLinkBuilder.linkTo(
-                                            methodOn(CourseDeliveryService.class).getCourse(trainerCourse.getId().getCourseId()))
+                                            methodOn(CoursesAPIController.class).getCourse(trainerCourse.getId().getCourseId()))
                                     .withRel(trainerCourse.getCourse().getTitle()))
                             .toList();
                     Link selfLink = WebMvcLinkBuilder.linkTo(
